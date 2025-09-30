@@ -1,21 +1,31 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { mockProducts } from "@/data/mockProducts";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
 import { Heart, Star, ShoppingBag, ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import ProductCard from "@/components/ProductCard";
+import { useProduct } from "@/hooks/useProduct";
+import { useProducts } from "@/hooks/useProducts";
 
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart, addToWishlist, isInWishlist, removeFromWishlist } = useCart();
 
-  const product = mockProducts.find((p) => p.id === id);
+  const { data: product, isLoading } = useProduct(id);
+  const { data: allProducts = [] } = useProducts();
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState<string>();
   const [selectedColor, setSelectedColor] = useState<string>();
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-16 text-center">
+        <p className="text-xl text-muted-foreground">Loading product...</p>
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -27,7 +37,7 @@ const ProductDetail = () => {
   }
 
   const inWishlist = isInWishlist(product.id);
-  const relatedProducts = mockProducts
+  const relatedProducts = allProducts
     .filter((p) => p.category === product.category && p.id !== product.id)
     .slice(0, 4);
 

@@ -1,12 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { categories } from "@/data/categories";
-import { mockProducts } from "@/data/mockProducts";
 import ProductCard from "@/components/ProductCard";
 import { ArrowRight } from "lucide-react";
+import { useProducts } from "@/hooks/useProducts";
 
 const Home = () => {
-  const featuredProducts = mockProducts.slice(0, 8);
+  const { data: products = [], isLoading } = useProducts();
+  const featuredProducts = products.slice(0, 8);
 
   return (
     <div className="min-h-screen">
@@ -77,9 +78,15 @@ const Home = () => {
           </Button>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-          {featuredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+          {isLoading ? (
+            <div className="col-span-full text-center py-8 text-muted-foreground">
+              Loading products...
+            </div>
+          ) : (
+            featuredProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))
+          )}
         </div>
       </section>
 

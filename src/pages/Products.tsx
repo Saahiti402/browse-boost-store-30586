@@ -1,8 +1,8 @@
 import { useState, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import ProductCard from "@/components/ProductCard";
-import { mockProducts } from "@/data/mockProducts";
 import { categories } from "@/data/categories";
+import { useProducts } from "@/hooks/useProducts";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -16,6 +16,8 @@ const Products = () => {
   const subcategoryParam = searchParams.get("subcategory");
   const searchQuery = searchParams.get("search");
 
+  const { data: products = [], isLoading } = useProducts();
+
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     categoryParam ? [categoryParam] : []
   );
@@ -26,8 +28,8 @@ const Products = () => {
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
 
   const brands = useMemo(() => {
-    return Array.from(new Set(mockProducts.map((p) => p.seller)));
-  }, []);
+    return Array.from(new Set(products.map((p) => p.seller)));
+  }, [products]);
 
   // Initialize filters from URL params
   useState(() => {
@@ -40,7 +42,7 @@ const Products = () => {
   });
 
   const filteredProducts = useMemo(() => {
-    let filtered = mockProducts;
+    let filtered = products;
 
     // Filter by category (prioritize URL param)
     const categoriesToFilter = categoryParam ? [categoryParam] : selectedCategories;
@@ -75,7 +77,7 @@ const Products = () => {
     }
 
     return filtered;
-  }, [selectedCategories, selectedSubcategories, priceRange, selectedBrands, searchQuery, categoryParam, subcategoryParam]);
+  }, [products, selectedCategories, selectedSubcategories, priceRange, selectedBrands, searchQuery, categoryParam, subcategoryParam]);
 
   const FilterContent = () => (
     <div className="space-y-6">
@@ -236,7 +238,11 @@ const Products = () => {
             </Sheet>
           </div>
 
-          {filteredProducts.length === 0 ? (
+          {isLoading ? (
+            <div className="text-center py-16">
+              <p className="text-xl text-muted-foreground">Loading products...</p>
+            </div>
+          ) : filteredProducts.length === 0 ? (
             <div className="text-center py-16">
               <p className="text-xl text-muted-foreground">No products found</p>
               <Button
