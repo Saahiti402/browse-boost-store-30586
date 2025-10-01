@@ -1,12 +1,21 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
-import { Heart, Star, ShoppingBag, ArrowLeft } from "lucide-react";
+import { Heart, Star, ShoppingBag, Home, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import ProductCard from "@/components/ProductCard";
 import { useProduct } from "@/hooks/useProduct";
 import { useProducts } from "@/hooks/useProducts";
+import { categories } from "@/data/categories";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -40,6 +49,8 @@ const ProductDetail = () => {
   const relatedProducts = allProducts
     .filter((p) => p.category === product.category && p.id !== product.id)
     .slice(0, 4);
+  
+  const currentCategory = categories.find((c) => c.id === product.category);
 
   const handleAddToCart = () => {
     addToCart(product, selectedSize, selectedColor);
@@ -55,10 +66,53 @@ const ProductDetail = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <Button variant="ghost" className="mb-6" onClick={() => navigate(-1)}>
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        Back
-      </Button>
+      {/* Breadcrumb Navigation */}
+      <Breadcrumb className="mb-6">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink onClick={() => navigate("/")} className="cursor-pointer flex items-center gap-1">
+              <Home className="h-4 w-4" />
+              Home
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          {currentCategory && (
+            <>
+              <BreadcrumbSeparator>
+                <ChevronRight className="h-4 w-4" />
+              </BreadcrumbSeparator>
+              <BreadcrumbItem>
+                <BreadcrumbLink 
+                  onClick={() => navigate(`/category/${currentCategory.id}`)} 
+                  className="cursor-pointer"
+                >
+                  {currentCategory.name}
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+            </>
+          )}
+          {product.subcategory && (
+            <>
+              <BreadcrumbSeparator>
+                <ChevronRight className="h-4 w-4" />
+              </BreadcrumbSeparator>
+              <BreadcrumbItem>
+                <BreadcrumbLink 
+                  onClick={() => navigate(`/products?category=${product.category}&subcategory=${product.subcategory}`)} 
+                  className="cursor-pointer"
+                >
+                  {product.subcategory}
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+            </>
+          )}
+          <BreadcrumbSeparator>
+            <ChevronRight className="h-4 w-4" />
+          </BreadcrumbSeparator>
+          <BreadcrumbItem>
+            <BreadcrumbPage>{product.name}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
       <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
         {/* Product Images */}

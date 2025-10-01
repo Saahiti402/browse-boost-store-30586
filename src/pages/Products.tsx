@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import ProductCard from "@/components/ProductCard";
 import { categories } from "@/data/categories";
 import { useProducts } from "@/hooks/useProducts";
@@ -8,15 +8,26 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { SlidersHorizontal } from "lucide-react";
+import { SlidersHorizontal, Home, ChevronRight } from "lucide-react";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 const Products = () => {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const categoryParam = searchParams.get("category");
   const subcategoryParam = searchParams.get("subcategory");
   const searchQuery = searchParams.get("search");
 
   const { data: products = [], isLoading } = useProducts();
+
+  const currentCategory = categories.find((c) => c.id === categoryParam);
 
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     categoryParam ? [categoryParam] : []
@@ -181,6 +192,63 @@ const Products = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Breadcrumb Navigation */}
+      <Breadcrumb className="mb-6">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink onClick={() => navigate("/")} className="cursor-pointer flex items-center gap-1">
+              <Home className="h-4 w-4" />
+              Home
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          {categoryParam && (
+            <>
+              <BreadcrumbSeparator>
+                <ChevronRight className="h-4 w-4" />
+              </BreadcrumbSeparator>
+              <BreadcrumbItem>
+                <BreadcrumbLink 
+                  onClick={() => navigate(`/category/${categoryParam}`)} 
+                  className="cursor-pointer"
+                >
+                  {currentCategory?.name || categoryParam}
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+            </>
+          )}
+          {subcategoryParam && (
+            <>
+              <BreadcrumbSeparator>
+                <ChevronRight className="h-4 w-4" />
+              </BreadcrumbSeparator>
+              <BreadcrumbItem>
+                <BreadcrumbPage>{subcategoryParam}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </>
+          )}
+          {searchQuery && !categoryParam && !subcategoryParam && (
+            <>
+              <BreadcrumbSeparator>
+                <ChevronRight className="h-4 w-4" />
+              </BreadcrumbSeparator>
+              <BreadcrumbItem>
+                <BreadcrumbPage>Search Results</BreadcrumbPage>
+              </BreadcrumbItem>
+            </>
+          )}
+          {!categoryParam && !subcategoryParam && !searchQuery && (
+            <>
+              <BreadcrumbSeparator>
+                <ChevronRight className="h-4 w-4" />
+              </BreadcrumbSeparator>
+              <BreadcrumbItem>
+                <BreadcrumbPage>All Products</BreadcrumbPage>
+              </BreadcrumbItem>
+            </>
+          )}
+        </BreadcrumbList>
+      </Breadcrumb>
+
       <div className="flex gap-8">
         {/* Desktop Filters */}
         <aside className="hidden lg:block w-64 flex-shrink-0">
