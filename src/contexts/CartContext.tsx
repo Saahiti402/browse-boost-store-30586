@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { CartItem, Product } from "@/types/product";
 import { toast } from "@/hooks/use-toast";
+import { useAuth } from "./AuthContext";
 
 interface CartContextType {
   cart: CartItem[];
@@ -29,6 +31,8 @@ export const useCart = () => {
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [wishlist, setWishlist] = useState<Product[]>([]);
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -48,6 +52,16 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [wishlist]);
 
   const addToCart = (product: Product, size?: string, color?: string) => {
+    if (!user) {
+      navigate("/auth", { state: { from: window.location.pathname } });
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to add items to your cart",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setCart((prev) => {
       const existingItem = prev.find((item) => item.id === product.id);
       if (existingItem) {
@@ -94,6 +108,16 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const addToWishlist = (product: Product) => {
+    if (!user) {
+      navigate("/auth", { state: { from: window.location.pathname } });
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to add items to your wishlist",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (isInWishlist(product.id)) {
       toast({
         title: "Already in wishlist",
