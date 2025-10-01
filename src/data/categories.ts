@@ -53,13 +53,13 @@ export const categories: Category[] = [
     name: "Beauty",
     image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800&q=80",
     subcategories: [
-      "Face",
-      "Eyes",
-      "Lips",
-      "Skincare",
-      "Haircare",
-      "Fragrance",
-      "Nails"
+      "face",
+      "eyes",
+      "lips",
+      "skincare",
+      "haircare",
+      "fragrance",
+      "nails"
     ]
   },
   {

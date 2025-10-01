@@ -26,7 +26,7 @@ export const useProducts = () => {
       const transformedProducts: Product[] = products.map((product: any) => ({
         id: product.id,
         name: product.name,
-        images: product.product_images
+        images: (product.product_images || [])
           .sort((a: any, b: any) => a.display_order - b.display_order)
           .map((img: any) => img.image_url),
         price: Number(product.price),
@@ -36,7 +36,7 @@ export const useProducts = () => {
         discount: product.discount || 0,
         seller: product.seller,
         category: product.category?.slug || "",
-        subcategory: product.subcategory?.name || "",
+        subcategory: product.subcategory?.slug || "",
         description: product.description || "",
         sizes: product.product_sizes?.map((s: any) => s.size) || [],
         colors: product.product_colors?.map((c: any) => c.color) || [],

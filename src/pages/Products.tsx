@@ -61,10 +61,14 @@ const Products = () => {
       filtered = filtered.filter((p) => categoriesToFilter.includes(p.category));
     }
 
-    // Filter by subcategory (prioritize URL param)
-    const subcategoriesToFilter = subcategoryParam ? [subcategoryParam] : selectedSubcategories;
+    // Filter by subcategory (prioritize URL param) - case-insensitive
+    const subcategoriesToFilter = subcategoryParam 
+      ? [subcategoryParam.toLowerCase()] 
+      : selectedSubcategories.map(s => s.toLowerCase());
     if (subcategoriesToFilter.length > 0) {
-      filtered = filtered.filter((p) => subcategoriesToFilter.includes(p.subcategory));
+      filtered = filtered.filter((p) => 
+        subcategoriesToFilter.includes(p.subcategory.toLowerCase())
+      );
     }
 
     // Filter by price range
