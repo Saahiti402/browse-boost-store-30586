@@ -99,7 +99,7 @@ const Products = () => {
             <div key={category.id} className="flex items-center space-x-2">
               <Checkbox
                 id={`cat-${category.id}`}
-                checked={categoryParam === category.id || selectedCategories.includes(category.id)}
+                checked={selectedCategories.includes(category.id)}
                 onCheckedChange={(checked) => {
                   if (checked) {
                     setSelectedCategories([...selectedCategories, category.id]);
