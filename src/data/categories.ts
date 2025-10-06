@@ -58,7 +58,6 @@ export const categories: Category[] = [
       "Lips",
       "Skincare",
       "Haircare",
-      "Fragrance",
       "Nails"
     ]
   },
