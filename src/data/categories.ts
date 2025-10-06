@@ -41,7 +41,7 @@ export const categories: Category[] = [
   {
     id: "home",
     name: "Home & Living",
-    image: "https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?w=800&q=80",
+    image: "https://media.designcafe.com/wp-content/uploads/2020/12/21184029/living-room-furniture-decor-ideas.jpg",
     subcategories: [
       "Bedding",
       "Cushions & Decor",
@@ -69,16 +69,6 @@ export const categories: Category[] = [
       "Watches",
       "Bags",
       "Jewelry"
-    ]
-  },
-   {
-    id: "homenliving",
-    name: "Home & Living",
-    image: "https://media.designcafe.com/wp-content/uploads/2020/12/21184029/living-room-furniture-decor-ideas.jpg",
-    subcategories: [
-      "Bedding",
-      "Cushions & Decor",
-      "Storage"
     ]
   }
 ];
