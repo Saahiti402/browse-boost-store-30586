@@ -70,5 +70,15 @@ export const categories: Category[] = [
       "Bags",
       "Jewelry"
     ]
+  },
+   {
+    id: "homenliving",
+    name: "Home & Living",
+    image: "https://media.designcafe.com/wp-content/uploads/2020/12/21184029/living-room-furniture-decor-ideas.jpg",
+    subcategories: [
+      "Bedding",
+      "Cushions & Decor",
+      "Storage"
+    ]
   }
 ];
