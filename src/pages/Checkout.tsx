@@ -7,10 +7,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Checkout = () => {
   const { cart, getTotalPrice, clearCart } = useCart();
+  const { user } = useAuth();
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -28,15 +32,78 @@ const Checkout = () => {
 
   const totalPrice = getTotalPrice();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would integrate with payment gateway (Stripe, Razorpay, etc.)
-    toast({
-      title: "Order Placed Successfully!",
-      description: "Your order has been confirmed. Thank you for shopping with us!",
-    });
-    clearCart();
-    navigate("/");
+    
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to place an order.",
+        variant: "destructive",
+      });
+      navigate("/auth");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Create the order
+      const { data: order, error: orderError } = await supabase
+        .from("orders")
+        .insert({
+          user_id: user.id,
+          full_name: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          address: formData.address,
+          city: formData.city,
+          state: formData.state,
+          pincode: formData.pincode,
+          total_amount: totalPrice,
+          status: "pending",
+        })
+        .select()
+        .single();
+
+      if (orderError) throw orderError;
+
+      // Create order items
+      const orderItems = cart.map((item) => ({
+        order_id: order.id,
+        product_id: item.id,
+        product_name: item.name,
+        product_image: item.images[0],
+        product_price: item.price,
+        quantity: item.quantity,
+        selected_size: item.selectedSize,
+        selected_color: item.selectedColor,
+        subtotal: item.price * item.quantity,
+      }));
+
+      const { error: itemsError } = await supabase
+        .from("order_items")
+        .insert(orderItems);
+
+      if (itemsError) throw itemsError;
+
+      toast({
+        title: "Order Placed Successfully!",
+        description: "Your order has been confirmed. Thank you for shopping with us!",
+      });
+      
+      clearCart();
+      navigate("/orders");
+    } catch (error) {
+      console.error("Error placing order:", error);
+      toast({
+        title: "Error",
+        description: "Failed to place order. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (
@@ -139,8 +206,8 @@ const Checkout = () => {
                 </div>
               </div>
 
-              <Button type="submit" size="lg" className="w-full mt-6">
-                Place Order & Pay ₹{totalPrice}
+              <Button type="submit" size="lg" className="w-full mt-6" disabled={isSubmitting}>
+                {isSubmitting ? "Placing Order..." : `Place Order & Pay ₹${totalPrice}`}
               </Button>
             </form>
           </Card>
