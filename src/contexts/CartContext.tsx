@@ -51,6 +51,16 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem("wishlist", JSON.stringify(wishlist));
   }, [wishlist]);
 
+  // Clear cart and wishlist when user signs out
+  useEffect(() => {
+    if (!user) {
+      setCart([]);
+      setWishlist([]);
+      localStorage.removeItem("cart");
+      localStorage.removeItem("wishlist");
+    }
+  }, [user]);
+
   const addToCart = (product: Product, size?: string, color?: string) => {
     if (!user) {
       navigate("/auth", { state: { from: window.location.pathname } });
