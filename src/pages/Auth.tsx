@@ -14,7 +14,6 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isNewUser, setIsNewUser] = useState(false);
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -24,7 +23,7 @@ const Auth = () => {
   useEffect(() => {
     const checkProfileAndRedirect = async () => {
       if (user) {
-        // Check if profile is incomplete (new user)
+        // Check if profile is incomplete
         const { data: profile } = await supabase
           .from("profiles")
           .select("full_name, email, phone, address, city, state, pincode")
@@ -32,17 +31,17 @@ const Auth = () => {
           .single();
 
         if (profile && (!profile.full_name || !profile.email || !profile.phone || !profile.address || !profile.city || !profile.state || !profile.pincode)) {
-          // New user with incomplete profile - redirect to profile
+          // Incomplete profile - redirect to profile page
           navigate("/profile", { replace: true });
-        } else if (!isNewUser) {
-          // Existing user with complete profile - redirect to intended page
+        } else {
+          // Complete profile - redirect to intended page
           navigate(from, { replace: true });
         }
       }
     };
 
     checkProfileAndRedirect();
-  }, [user, navigate, from, isNewUser]);
+  }, [user, navigate, from]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,10 +88,9 @@ const Auth = () => {
         variant: "destructive",
       });
     } else {
-      setIsNewUser(true);
       toast({
-        title: "Account created!",
-        description: "Please complete your profile to continue.",
+        title: "Check your email!",
+        description: "Please confirm your email address to continue.",
       });
     }
     
