@@ -13,7 +13,13 @@ import { useNavigate } from "react-router-dom";
 
 interface Profile {
   id: string;
-  display_name: string | null;
+  full_name: string | null;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  city: string | null;
+  state: string | null;
+  pincode: string | null;
   avatar_url: string | null;
   bio: string | null;
 }
@@ -24,7 +30,13 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [displayName, setDisplayName] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [pincode, setPincode] = useState("");
   const [bio, setBio] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
 
@@ -50,7 +62,13 @@ const Profile = () => {
 
       if (data) {
         setProfile(data);
-        setDisplayName(data.display_name || "");
+        setFullName(data.full_name || "");
+        setEmail(data.email || "");
+        setPhone(data.phone || "");
+        setAddress(data.address || "");
+        setCity(data.city || "");
+        setState(data.state || "");
+        setPincode(data.pincode || "");
         setBio(data.bio || "");
         setAvatarUrl(data.avatar_url || "");
       }
@@ -77,7 +95,13 @@ const Profile = () => {
         .from("profiles")
         .upsert({
           id: user.id,
-          display_name: displayName,
+          full_name: fullName,
+          email: email,
+          phone: phone,
+          address: address,
+          city: city,
+          state: state,
+          pincode: pincode,
           bio: bio,
           avatar_url: avatarUrl,
         });
@@ -110,8 +134,8 @@ const Profile = () => {
     );
   }
 
-  const initials = displayName
-    ? displayName
+  const initials = fullName
+    ? fullName
         .split(" ")
         .map((n) => n[0])
         .join("")
@@ -130,7 +154,7 @@ const Profile = () => {
             {/* Avatar Section */}
             <div className="flex items-center gap-4">
               <Avatar className="h-20 w-20">
-                <AvatarImage src={avatarUrl} alt={displayName || "User"} />
+                <AvatarImage src={avatarUrl} alt={fullName || "User"} />
                 <AvatarFallback className="text-lg">{initials}</AvatarFallback>
               </Avatar>
               <div className="flex-1">
@@ -145,36 +169,100 @@ const Profile = () => {
               </div>
             </div>
 
-            {/* Email (read-only) */}
+            {/* Full Name */}
+            <div className="space-y-2">
+              <Label htmlFor="full_name">
+                <User className="inline h-4 w-4 mr-2" />
+                Full Name *
+              </Label>
+              <Input
+                id="full_name"
+                type="text"
+                placeholder="Your full name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                required
+              />
+            </div>
+
+            {/* Email */}
             <div className="space-y-2">
               <Label htmlFor="email">
                 <Mail className="inline h-4 w-4 mr-2" />
-                Email
+                Email *
               </Label>
               <Input
                 id="email"
                 type="email"
-                value={user?.email || ""}
-                disabled
-                className="bg-muted"
+                placeholder="your@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
               />
-              <p className="text-xs text-muted-foreground">
-                Email cannot be changed
-              </p>
             </div>
 
-            {/* Display Name */}
+            {/* Phone */}
             <div className="space-y-2">
-              <Label htmlFor="display_name">
-                <User className="inline h-4 w-4 mr-2" />
-                Display Name
-              </Label>
+              <Label htmlFor="phone">Phone *</Label>
               <Input
-                id="display_name"
+                id="phone"
+                type="tel"
+                placeholder="Your phone number"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                required
+              />
+            </div>
+
+            {/* Address */}
+            <div className="space-y-2">
+              <Label htmlFor="address">Address *</Label>
+              <Textarea
+                id="address"
+                placeholder="Your complete address"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                rows={2}
+                required
+              />
+            </div>
+
+            {/* City */}
+            <div className="space-y-2">
+              <Label htmlFor="city">City *</Label>
+              <Input
+                id="city"
                 type="text"
-                placeholder="Your name"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder="Your city"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                required
+              />
+            </div>
+
+            {/* State */}
+            <div className="space-y-2">
+              <Label htmlFor="state">State *</Label>
+              <Input
+                id="state"
+                type="text"
+                placeholder="Your state"
+                value={state}
+                onChange={(e) => setState(e.target.value)}
+                required
+              />
+            </div>
+
+            {/* Pincode */}
+            <div className="space-y-2">
+              <Label htmlFor="pincode">Pincode *</Label>
+              <Input
+                id="pincode"
+                type="text"
+                placeholder="Your pincode"
+                value={pincode}
+                onChange={(e) => setPincode(e.target.value)}
+                required
               />
             </div>
 

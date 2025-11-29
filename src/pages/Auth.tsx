@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +14,7 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isNewUser, setIsNewUser] = useState(false);
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -20,10 +22,27 @@ const Auth = () => {
   const from = (location.state as any)?.from || "/";
 
   useEffect(() => {
-    if (user) {
-      navigate(from, { replace: true });
-    }
-  }, [user, navigate, from]);
+    const checkProfileAndRedirect = async () => {
+      if (user) {
+        // Check if profile is incomplete (new user)
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("full_name, email, phone, address, city, state, pincode")
+          .eq("id", user.id)
+          .single();
+
+        if (profile && (!profile.full_name || !profile.email || !profile.phone || !profile.address || !profile.city || !profile.state || !profile.pincode)) {
+          // New user with incomplete profile - redirect to profile
+          navigate("/profile", { replace: true });
+        } else if (!isNewUser) {
+          // Existing user with complete profile - redirect to intended page
+          navigate(from, { replace: true });
+        }
+      }
+    };
+
+    checkProfileAndRedirect();
+  }, [user, navigate, from, isNewUser]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,9 +89,10 @@ const Auth = () => {
         variant: "destructive",
       });
     } else {
+      setIsNewUser(true);
       toast({
         title: "Account created!",
-        description: "You've successfully signed up.",
+        description: "Please complete your profile to continue.",
       });
     }
     
