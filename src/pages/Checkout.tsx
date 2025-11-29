@@ -5,16 +5,29 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { z } from "zod";
+import { Loader2 } from "lucide-react";
+
+const checkoutSchema = z.object({
+  fullName: z.string().trim().min(1, "Full name is required").max(100, "Name must be less than 100 characters"),
+  email: z.string().trim().email("Invalid email address").max(255, "Email must be less than 255 characters"),
+  phone: z.string().trim().min(10, "Phone number must be at least 10 digits").max(15, "Phone number must be less than 15 digits"),
+  address: z.string().trim().min(5, "Address is required").max(500, "Address must be less than 500 characters"),
+  city: z.string().trim().min(1, "City is required").max(100, "City must be less than 100 characters"),
+  state: z.string().trim().min(1, "State is required").max(100, "State must be less than 100 characters"),
+  pincode: z.string().trim().min(5, "Pincode must be at least 5 characters").max(10, "Pincode must be less than 10 characters"),
+});
 
 const Checkout = () => {
   const { cart, getTotalPrice, clearCart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -24,6 +37,52 @@ const Checkout = () => {
     state: "",
     pincode: "",
   });
+
+  // Fetch and pre-fill profile data
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      if (!user) {
+        navigate("/auth");
+        return;
+      }
+
+      try {
+        const { data: profile, error } = await supabase
+          .from("profiles")
+          .select("full_name, email, phone, address, city, state, pincode")
+          .eq("id", user.id)
+          .single();
+
+        if (error) throw error;
+
+        if (profile) {
+          setFormData({
+            fullName: profile.full_name || "",
+            email: profile.email || user.email || "",
+            phone: profile.phone || "",
+            address: profile.address || "",
+            city: profile.city || "",
+            state: profile.state || "",
+            pincode: profile.pincode || "",
+          });
+        } else {
+          // If no profile data, at least set the email
+          setFormData(prev => ({ ...prev, email: user.email || "" }));
+        }
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+        toast({
+          title: "Notice",
+          description: "Could not load saved address. Please fill in your details.",
+          variant: "default",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProfileData();
+  }, [user, navigate]);
 
   if (cart.length === 0) {
     navigate("/cart");
@@ -42,6 +101,20 @@ const Checkout = () => {
         variant: "destructive",
       });
       navigate("/auth");
+      return;
+    }
+
+    // Validate form data
+    try {
+      checkoutSchema.parse(formData);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast({
+          title: "Validation Error",
+          description: error.errors[0].message,
+          variant: "destructive",
+        });
+      }
       return;
     }
 
@@ -114,6 +187,14 @@ const Checkout = () => {
       [e.target.name]: e.target.value,
     });
   };
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-16 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
