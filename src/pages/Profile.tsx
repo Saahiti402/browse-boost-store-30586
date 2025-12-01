@@ -113,7 +113,8 @@ const Profile = () => {
         description: "Your profile has been successfully updated.",
       });
 
-      fetchProfile();
+      // Redirect to homepage after profile save
+      navigate("/");
     } catch (error: any) {
       console.error("Error updating profile:", error);
       toast({
